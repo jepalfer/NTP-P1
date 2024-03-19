@@ -1,0 +1,34 @@
+• clase Pixel:
+– obtenerMásCercano
+
+• interfaz Utilidades
+– calcularMedia
+– obtenerMinimoMaximo
+– obtenerPuntosIntervalo
+– cargarImagen
+– salvarImagen
+
+• MuestreoAleatorio
+– seleccionar
+
+• clase SeleccionUniforme
+– seleccionar
+
+• MuestreoEstratificado
+– seleccionar
+– agruparPixelsIntervalos
+– obtenerDistribucion
+– muestrear
+– obtenerTramo
+
+• ConvergenciaEstabilidad
+– convergencia
+
+• ConvergenciaRuido
+– convergencia
+
+• clase KMedias
+– iterar
+– clasificar
+– actualizar
+– aplicarFiltro
