@@ -213,7 +213,7 @@ public class KMedias {
     *
     * @return imagen generada tras el filtrado
     */
-   public Imagen agrupar() {
+   public Imagen agrupar(boolean funcional) {
       // se produce la inicializacion de los centroides para
       // empezar el proceso
       centrosT1 = inicializador.seleccionar(this);
@@ -221,7 +221,13 @@ public class KMedias {
       // se llama al metodo que realiza el bucle principal
       // de calculo de distancias - asignacion - determinacion
       // de nuevos centroides, hasta que haya convergencia
-      iterar();
+
+      if (funcional) {
+         iterarFuncional();
+      }
+      else {
+         iterar();
+      }
 
       // se crea una nueva imagen a partir de la actual,
       // pero aplicando el filtro dado por el resultado
@@ -274,7 +280,7 @@ public class KMedias {
       actualizar();
 
       // comprobar si hay convergencia
-      boolean convergencia = parada.convergencia(this);
+      boolean convergencia = parada.convergenciaFuncional(this);
 
       // se actualizan los centroides
       centrosT1 = centrosT2;
@@ -286,7 +292,7 @@ public class KMedias {
          iteraciones++;
 
          // se produce la llamada recursiva
-         iterar();
+         iterarFuncional();
       }
       else{
          // se obtiene la medida obtenida para la
