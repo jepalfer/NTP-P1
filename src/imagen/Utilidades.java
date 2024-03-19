@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * clase con metodos estaticos de utilidad
@@ -43,22 +45,12 @@ public interface Utilidades {
       return new Pixel(sumaRojo, sumaVerde, sumaAzul);
    }
    static Pixel calcularMediaFuncional(List<Pixel> pixels) {
-      double sumaRojo = 0;
-      double sumaVerde = 0;
-      double sumaAzul = 0;
-
-      // recorrido de todos los pixels pasados como argumentos
-      for(int i=0; i < pixels.size(); i++){
-         Pixel pixel = pixels.get(i);
-         sumaRojo += pixel.obtenerComponente(ComponentesRGBA.ROJO);
-         sumaVerde += pixel.obtenerComponente(ComponentesRGBA.VERDE);
-         sumaAzul += pixel.obtenerComponente(ComponentesRGBA.AZUL);
-      }
-
-      // se calculan los valores medios
-      sumaRojo = sumaRojo / pixels.size();
-      sumaVerde = sumaVerde / pixels.size();
-      sumaAzul = sumaAzul / pixels.size();
+      double sumaRojo = pixels.stream().mapToDouble(pixel -> pixel.obtenerComponente(ComponentesRGBA.ROJO)).
+                  average().orElse(0);
+      double sumaVerde = pixels.stream().mapToDouble(pixel -> pixel.obtenerComponente(ComponentesRGBA.VERDE)).
+                  average().orElse(0);
+      double sumaAzul = pixels.stream().mapToDouble(pixel -> pixel.obtenerComponente(ComponentesRGBA.AZUL)).
+                  average().orElse(0);
 
       // se devuelve el pixel que representa el centro
       // del grupo de pixels pasado como argumento
@@ -103,27 +95,13 @@ public interface Utilidades {
    }
 
    static List<Integer> obtenerMinimoMaximoFuncional(List<Pixel> pixels) {
-      // inicializar los valores minimo y maximo
-      Pixel primero = pixels.get(0);
-      int minimo = primero.obtenerIndice();
-      int maximo = primero.obtenerIndice();
-
-      // se consideran todos los pixels
-      for(int i=1; i < pixels.size(); i++){
-         Pixel pi = pixels.get(i);
-         int indiceColor = pi.obtenerIndice();
-         if(indiceColor < minimo){
-            minimo = indiceColor;
-         }
-         if(indiceColor > maximo){
-            maximo = indiceColor;
-         }
-      }
-
+      // ordenamos la lista de indices
+      List<Integer> listaOrdenada = pixels.stream().map(pixel -> pixel.obtenerIndice()).sorted().
+              collect(Collectors.toList());
       // creo una lista para devolver los valores calculados
       ArrayList<Integer> minMax = new ArrayList<>();
-      minMax.add(minimo);
-      minMax.add(maximo);
+      minMax.add(listaOrdenada.get(0));
+      minMax.add(listaOrdenada.get(listaOrdenada.size() - 1));
 
       // devolver la lista
       return minMax;
@@ -155,19 +133,23 @@ public interface Utilidades {
       // se devuelve la lista
       return enIntervalo;
    }
+
    static List<Pixel> obtenerPuntosIntervaloFuncional(List<Pixel> pixels,
                                              double minimo, double maximo) {
-      List<Pixel> enIntervalo = new ArrayList<>();
+      return pixels.stream().filter(pixel -> pixel.enIntervalo(minimo, maximo)).
+              collect(Collectors.toList());
+   }
 
-      // recorrido de los pixels de la coleccion
-      for(Pixel pixel : pixels){
-         if(pixel.enIntervalo(minimo, maximo)){
-            enIntervalo.add(pixel);
+   static List<Pixel> obtenerPuntosIntervaloFuncionalV2(List<Pixel> pixels,
+                                                        double minimo, double maximo) {
+      return pixels.stream().map(pixel -> {
+         if (pixel.enIntervalo(minimo, maximo)) {
+            return pixel;
          }
-      }
-
-      // se devuelve la lista
-      return enIntervalo;
+         else {
+            return null;
+         }
+      }).collect(Collectors.toList());
    }
 
    /**
