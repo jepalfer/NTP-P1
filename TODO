@@ -1,7 +1,4 @@
 • interfaz Utilidades
-– calcularMedia
-– obtenerMinimoMaximo
-– obtenerPuntosIntervalo
 – cargarImagen
 – salvarImagen
 
