@@ -1,6 +1,8 @@
 package imagen;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -109,21 +111,9 @@ public class Imagen {
    }
 
    public List<Pixel> convertirIndicesColoresPixelsFuncional() {
-// se crea la lista a devolver
-      ArrayList<Pixel> pixels = new ArrayList<>();
-
-      // recorrer todo el array de datos y convertimos
-      // cada indice de color en el pixel correspondiente
-      for(int i=0; i < datos.size(); i++){
-         int indiceColor = datos.get(i);
-
-         // agrego a la lista el nuevo objeto asociado
-         // a ese indice de color
-         pixels.add(RGBA.generarPixel(indiceColor));
-      }
-
-      // devuelve la lista de pixels
-      return pixels;
+      // generamos la lista de salida con un map, asignando a cada elemento de los datos su pixel
+      // generado con el método generarPixel(Pixel) de la interfaz RGBA
+      return datos.stream().map(pixel -> RGBA.generarPixel(pixel)).collect(Collectors.toList());
    }
 
    /**
@@ -163,31 +153,33 @@ public class Imagen {
    }
 
    public long obtenerNumeroColoresFuncional() {
-      // diccionario con pares clave - valor
-      // clave: el indice del color
-      // valor: contador de pixels con el color correpsondiente
-      Map<Integer, Integer> mapa = new HashMap<>();
+      return datos.stream().
+              collect(Collectors.groupingBy(Function.identity(), HashMap::new, Collectors.counting())).
+              size();
+   }
 
-      // se recorren los pixels para considerar su
-      // indice de color
-      for(int i=0; i < datos.size(); i++){
-         // obtenemos el color del pixel considerado
-         int color = datos.get(i);
-         Integer contadorColor = mapa.get(color);
+   public static void main(String[] args) {
+      String ruta = "./data/barco.png";
+      Imagen imagen = Utilidades.cargarImagen(ruta);
 
-         // si no estaba ese color, contadorColor sera
-         // null y tengo que agregar una nueva entrada.
-         // En caso contrario, modifico la entrada para
-         // cambiar el contador
-         if(contadorColor == null){
-            mapa.put(color, 1);
-         }
-         else{
-            mapa.put(color, contadorColor+1);
+      System.out.println(imagen.obtenerNumeroColoresFuncional());
+      System.out.println(imagen.obtenerNumeroColores());
+
+      List<Pixel> funcional = imagen.convertirIndicesColoresPixelsFuncional();
+      List<Pixel> noFuncional = imagen.convertirIndicesColoresPixels();
+
+      boolean iguales = true;
+
+      System.out.println(funcional.size() + " " + noFuncional.size());
+      for (int i = 0; i < funcional.size(); ++i){
+         if ((funcional.get(i).obtenerComponente(ComponentesRGBA.ROJO) != noFuncional.get(i).obtenerComponente(ComponentesRGBA.ROJO)) &&
+             (funcional.get(i).obtenerComponente(ComponentesRGBA.VERDE) != noFuncional.get(i).obtenerComponente(ComponentesRGBA.VERDE)) &&
+             (funcional.get(i).obtenerComponente(ComponentesRGBA.AZUL) != noFuncional.get(i).obtenerComponente(ComponentesRGBA.AZUL))) {
+            iguales = false;
+            break;
          }
       }
 
-      // se devuelve el numero de colores
-      return mapa.size();
+      System.out.println(iguales ? "Si son iguales" : "Fallaste lobo");
    }
 }
