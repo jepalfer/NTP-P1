@@ -447,7 +447,7 @@ public class AplicacionFiltrado extends JFrame {
       compresion.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-            ejecutarFiltrado();
+            ejecutarFiltrado(false);
          }
       });
 
@@ -469,6 +469,26 @@ public class AplicacionFiltrado extends JFrame {
          @Override
          public void actionPerformed(ActionEvent e) {
             ejecutarRecarga();
+         }
+      });
+
+      // se agrega el boton de compresion funcional
+      JButton compresionFuncional = new JButton("Aplica funcional");
+      compresionFuncional.setPreferredSize(new Dimension(50, 50));
+
+      // se posiciona
+      c = new GridBagConstraints();
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.gridx = 0;
+      c.gridy = fila + 1;
+      c.insets = new Insets(5, 10, 0, 0);
+      panel.add(compresionFuncional, c);
+
+      // asigna la funcion de accion
+      compresionFuncional.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            ejecutarFiltrado(true);
          }
       });
    }
@@ -568,7 +588,7 @@ public class AplicacionFiltrado extends JFrame {
     * metodo para ejecutar el filtrado mediante
     * aplicacion del algoritmo de las k-medias
     */
-   private void ejecutarFiltrado() {
+   private void ejecutarFiltrado(boolean funcional) {
       double tiempo = System.currentTimeMillis();
       double umbral = 0.0;
       switch (obtenerModoConvergencia()) {
@@ -589,7 +609,7 @@ public class AplicacionFiltrado extends JFrame {
       informarTexto(obtenerModoInicializacion(), obtenerModoConvergencia());
 
       // se llama al metodo agrupar
-      Imagen filtrada = kmedias.agrupar();
+      Imagen filtrada = kmedias.agrupar(funcional);
       canvas.asignarImagen(filtrada);
       tiempo = System.currentTimeMillis() - tiempo;
 
