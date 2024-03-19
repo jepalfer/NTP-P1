@@ -140,22 +140,10 @@ public class Pixel implements Comparable<Pixel> {
     * NOTA: por implementar
     */
    public Pixel obtenerMasCercanoFuncional(List<Pixel> centros) {
-      Pixel minimo = centros.get(0);
-      double minimaDistancia = distanciaCuadratica(minimo);
-
-      // se consideran los demas centros
-      for(int i=1; i < centros.size(); i++){
-         Pixel centro = centros.get(i);
-         double distancia = distanciaCuadratica(centro);
-
-         // si es necesario, se actualiza el minimo
-         if(minimaDistancia > distancia){
-            minimaDistancia = distancia;
-            minimo = centro;
-         }
-      }
-      // devolver el centro mas cercano
-      return minimo;
+      // hacemos que sea un flujo de pixeles y lo ordenamos según la distancia cuadrática 
+      // a cada centro para ver cuál es el más cercano al pixel que utiliza la llamada a la función
+      return centros.Stream().sorted(Comparator.comparingDouble(centro -> distanciaCuadratica(centro))).
+         collect(Collectors.toList()).get(0);
    }
 
    /**
