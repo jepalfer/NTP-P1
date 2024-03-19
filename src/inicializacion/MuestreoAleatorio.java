@@ -6,6 +6,8 @@ import kmedias.KMedias;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * clase para realizar la inicializacion de
@@ -50,29 +52,22 @@ public class MuestreoAleatorio implements EstrategiaInicializacion {
    }
    @Override
    public List<Pixel> seleccionarFuncional(KMedias kmedias) {
-      // crear la coleccion a devolver
-      ArrayList<Pixel> seleccionados = new ArrayList<>();
-
       // obtener los pixels de donde se muestrea
       List<Pixel> pixels = kmedias.obtenerPixels();
 
       // generar un array de indices desde 0 hasta
       // el numero de pixels - 1
-      ArrayList<Integer> indices = new ArrayList<>();
-      for(int i=0; i < pixels.size(); i++){
-         indices.add(i);
-      }
+      List<Integer> indices = IntStream.range(0, pixels.size()).
+                                   boxed().
+                                   collect(Collectors.toList());
 
       // se baraja el array de indices
       Collections.shuffle(indices);
 
       // se seleccionan los k primeros elementos de
       // el array barajado de indices
-      for(int i=0; i < kmedias.obtenerK(); i++){
-         seleccionados.add(pixels.get(indices.get(i)));
-      }
+      return indices.stream().map(pixel -> pixels.get(pixel)).limit(kmedias.obtenerK()).
+              collect(Collectors.toList());
 
-      // se devuelve la lista de puntos seleccionados
-      return seleccionados;
    }
 }
