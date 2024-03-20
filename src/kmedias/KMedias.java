@@ -214,25 +214,36 @@ public class KMedias {
     * @return imagen generada tras el filtrado
     */
    public Imagen agrupar(boolean funcional) {
-      // se produce la inicializacion de los centroides para
-      // empezar el proceso
-      centrosT1 = inicializador.seleccionar(this);
-
-      // se llama al metodo que realiza el bucle principal
-      // de calculo de distancias - asignacion - determinacion
-      // de nuevos centroides, hasta que haya convergencia
-
       if (funcional) {
+         // se produce la inicializacion de los centroides para
+         // empezar el proceso
+
+         centrosT1 = inicializador.seleccionarFuncional(this);
+         // se llama al metodo que realiza el bucle principal
+         // de calculo de distancias - asignacion - determinacion
+         // de nuevos centroides, hasta que haya convergencia
          iterarFuncional();
+         // se crea una nueva imagen a partir de la actual,
+         // pero aplicando el filtro dado por el resultado
+         // del algoritmo de agrupamiento
+         return aplicarFiltroFuncional();
       }
       else {
+         // se produce la inicializacion de los centroides para
+         // empezar el proceso
+
+         centrosT1 = inicializador.seleccionar(this);
+
+         // se llama al metodo que realiza el bucle principal
+         // de calculo de distancias - asignacion - determinacion
+         // de nuevos centroides, hasta que haya convergencia
          iterar();
+         // se crea una nueva imagen a partir de la actual,
+         // pero aplicando el filtro dado por el resultado
+         // del algoritmo de agrupamiento
+         return aplicarFiltro();
       }
 
-      // se crea una nueva imagen a partir de la actual,
-      // pero aplicando el filtro dado por el resultado
-      // del algoritmo de agrupamiento
-      return aplicarFiltro();
    }
 
    /**
@@ -274,10 +285,10 @@ public class KMedias {
    private void iterarFuncional() {
       // clasificar los pixels por distancia a los
       // centroides iniciales
-      clasificacion = clasificar();
+      clasificacion = clasificarFuncional();
 
       // se actualizan los centroides
-      actualizar();
+      actualizarFuncional();
 
       // comprobar si hay convergencia
       boolean convergencia = parada.convergenciaFuncional(this);
@@ -351,7 +362,7 @@ public class KMedias {
       // procesado de los pixels uno por uno
       for(Pixel pixel : pixels){
          // se obtiene el centro mas cercano
-         Pixel centroMasCercano = pixel.obtenerMasCercano(centrosT1);
+         Pixel centroMasCercano = pixel.obtenerMasCercanoFuncional(centrosT1);
 
          // actualizo la lista correspondiente
          List<Pixel> grupo = resultado.get(centroMasCercano);
@@ -397,7 +408,7 @@ public class KMedias {
 
          // se comprueba que el grupo no este vacio
          if(!grupo.isEmpty()){
-            centrosT2.add(Utilidades.calcularMedia(grupo));
+            centrosT2.add(Utilidades.calcularMediaFuncional(grupo));
          }
          else{
             centrosT2.add(centrosT1.get(i));
@@ -450,7 +461,7 @@ public class KMedias {
          Pixel pixel = new Pixel(colorPixel);
 
          // se obtiene el mas cercano
-         Pixel masCercano = pixel.obtenerMasCercano(centrosT1);
+         Pixel masCercano = pixel.obtenerMasCercanoFuncional(centrosT1);
 
          // se agrega a la lista de pixels finales
          pixels.add(masCercano.obtenerIndice());

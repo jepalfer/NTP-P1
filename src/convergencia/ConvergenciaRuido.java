@@ -83,13 +83,14 @@ public class ConvergenciaRuido extends EstrategiaConvergencia {
       // se obtienen los pixels de la imagen
       List<Pixel> pixels = kmedias.obtenerPixels();
 
-      double sennal = pixels.Stream().mapToDouble(pixel -> pixel.calcularSennal()).sum();
-      double ruido = pixels.Stream().mapToDouble(pixel -> pixel.calcularRuido(pixel.obtenerMasCercano(kmedias.obtenerCentrosT2())).
-                                         sum();
+      double sennal = pixels.stream().mapToDouble(pixel -> pixel.calcularSennal()).sum();
+      double ruido = pixels.stream().mapToDouble(pixel -> pixel.calcularRuido(pixel.
+                     obtenerMasCercanoFuncional(kmedias.obtenerCentrosT2()))).
+                     sum();
 
       // se obtiene la medida
       double medida = sennal / ruido;
-      
+
       // se determina si converge
       return ((medida > umbral) || (kmedias.obtenerContadorIteraciones() >= maxIteraciones));
    }

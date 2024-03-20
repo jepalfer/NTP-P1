@@ -5,6 +5,9 @@ import kmedias.KMedias;
 import imagen.Utilidades;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * clase para aportar la seleccion de centroides
@@ -63,15 +66,16 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
       // agrupar los pixels de acuerdo a sus colores,
       // en los intervalos considerados
       Map<Integer, List<Pixel>> porIntervalo =
-              agruparPixelsIntervalos(k, pixels);
+              agruparPixelsIntervalosFuncional(k, pixels);
 
       // se obtiene la distribucion de probabilidad
       // asociada al agrupamiento
-      List<Double> distribucion = obtenerDistribucion(porIntervalo,
+      List<Double> distribucion = obtenerDistribucionFuncional(porIntervalo,
               pixels.size());
 
       // se realiza la seleccion
-      seleccionados = muestrear(porIntervalo, distribucion, k);
+      seleccionados = muestrearFuncional(porIntervalo, distribucion, k);
+
 
       // se devuelve la lista de centroides seleccionados
       return seleccionados;
@@ -121,34 +125,22 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
    }
    private Map<Integer, List<Pixel>> agruparPixelsIntervalosFuncional(int k,
                                                              List<Pixel> pixels) {
-      // crear el diccionario a devolver
-      Map<Integer, List<Pixel>> porIntervalo = new HashMap<>();
-
       // determinar colores minimo y maximo del rango de colores
-      List<Integer> minMax = Utilidades.obtenerMinimoMaximo(pixels);
+      List<Integer> minMax = Utilidades.obtenerMinimoMaximoFuncional(pixels);
       System.out.println("maximo color: " + minMax.get(1));
 
       // se calcula el incremento para fijar las marcas
       double incremento = (minMax.get(1) - minMax.get(0)) / (k * 1.0);
 
       // se van obteniendo los pixels en cada intervalo
-      for(int i=0; i < k; i++){
-         // obtener el color de inicio del tramo que corresponda
-         double inicio = minMax.get(0) + incremento*i;
-         double fin = inicio + incremento;
-         System.out.println("inicio: " + inicio + " fin: " + fin);
 
-         // se obtienen los pixels con indices de colores
-         // comprendidos en el intervalo
-         List<Pixel> enIntervalo =
-                 Utilidades.obtenerPuntosIntervalo(pixels, inicio, fin);
-
-         // agrego la entrada al diccionario
-         porIntervalo.put(i, enIntervalo);
-      }
-
-      // se devuelve el map
-      return porIntervalo;
+      return IntStream.range(0, k).boxed().collect(Collectors.toMap(
+              clave -> clave,
+              indice -> {
+                    double inicio = minMax.get(0) + incremento * indice;
+                    double fin = inicio + incremento;
+                    return Utilidades.obtenerPuntosIntervaloFuncional(pixels, inicio, fin);
+              }));
    }
 
 
@@ -189,38 +181,38 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
          distribucion.add(acumulado);
          System.out.println(" acumulado: " + acumulado);
       }
-
       // se devuelve la distribucion
       return distribucion;
    }
    private List<Double> obtenerDistribucionFuncional(
            Map<Integer, List<Pixel>> porIntervalo, int numeroPixels) {
-      // se crea la coleccion a devolver
       List<Double> distribucion = new ArrayList<>();
 
-      // se crean variables auxiliares
-      double acumulado = 0;
-      double valor;
+      porIntervalo.values().stream().
+              mapToInt(List::size).
+              mapToDouble(size -> size / (numeroPixels * 1.0)).
+              reduce(0.0, (x, y) -> {
+                 distribucion.add(x + y);
+                 return x+y;
+              });
 
-      // se recorren los agrupamientos para generar los
-      // valores de la distribucion
-      for(int i=0; i < porIntervalo.size(); i++) {
-         // se calcular el valor de probabilidad que
-         // corresponde al grupo
-         valor = porIntervalo.get(i).size() / (numeroPixels*1.0);
-         System.out.println("tam grupo: " + porIntervalo.get(i).size() +
-                 " - " + numeroPixels);
-         System.out.println("valor: " + valor);
+      return distribucion;
+   }
+   private List<Double> obtenerDistribucionFuncionalV2(
+           Map<Integer, List<Pixel>> porIntervalo, int numeroPixels) {
+      List<Double> distribucion = new ArrayList<>();
 
-         // incremento acumulado
-         acumulado += valor;
+      List<Double> acumulados = porIntervalo.entrySet().stream().map(intervalo -> {
+         double valor = intervalo.getValue().size() / (numeroPixels * 1.0);
+         return valor;
+      }).collect(Collectors.toList());
 
-         // almaceno el valor acumulado
-         distribucion.add(acumulado);
-         System.out.println(" acumulado: " + acumulado);
-      }
 
-      // se devuelve la distribucion
+      acumulados.stream().reduce(0.0, (x, y) -> {
+         distribucion.add(x + y);
+         return x+y;
+      });
+
       return distribucion;
    }
    /**
@@ -241,6 +233,7 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
            List<Double> distribucion, int k) {
       // se crea la lista de pixels a devolver
       List<Pixel> seleccionados = new ArrayList<>();
+
 
       // se crea el generador de numeros aleatorios
       Random generador = new Random();
@@ -274,33 +267,18 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
            List<Double> distribucion, int k) {
       // se crea la lista de pixels a devolver
       List<Pixel> seleccionados = new ArrayList<>();
-
       // se crea el generador de numeros aleatorios
       Random generador = new Random();
 
       // se realiza el muestreo mediante generacion
       // de numeros aleatorios
-      double semilla;
-      int indiceIntervalo;
-      for(int i=0; i < k; i++){
-         // generar el numero aleatorio
-         semilla = generador.nextDouble();
 
-         // se obtiene el tramo al que corresponde el
-         // valor de semilla de acuerdo a la distribucion
-         indiceIntervalo = obtenerTramo(semilla, distribucion);
-
-         // se selecciona pixel del intervalo correspondiente
-         Pixel seleccionado =
-                 seleccionarPixelTramo(porIntervalo.get(indiceIntervalo));
-
-         // se agrega el pixel seleccionado a la lista de
-         // seleccionados
-         seleccionados.add(seleccionado);
-      }
-
-      // se devuelve la lista de pixels seleccionados
-      return seleccionados;
+      return IntStream.range(0, k).boxed().map(indice -> {
+            double semilla = generador.nextDouble();
+            int indiceIntervalo = obtenerTramoFuncional(semilla, distribucion);
+            return seleccionarPixelTramo(porIntervalo.get(indiceIntervalo));
+         }
+      ).collect(Collectors.toList());
    }
 
    /**
@@ -330,20 +308,12 @@ public class MuestreoEstratificado implements EstrategiaInicializacion {
       return indice;
    }
    private int obtenerTramoFuncional(double semilla, List<Double> distribucion) {
-      boolean terminar = false;
-      int indice = -1;
-
       // bucle de recorrido de los valores de la
       // distribucion
-      for(int i=0; i < distribucion.size() && !terminar; i++){
-         if(distribucion.get(i) >= semilla){
-            terminar = true;
-            indice = i;
-         }
-      }
-
-      // se devuelve el valor de indice
-      return indice;
+      return IntStream.range(0, distribucion.size()).
+              filter(i -> distribucion.get(i) >= semilla).
+              findFirst().
+              orElse(-1);
    }
 
 

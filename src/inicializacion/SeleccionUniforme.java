@@ -6,6 +6,7 @@ import kmedias.KMedias;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * clase para seleccion de colores partiendo la
@@ -70,7 +71,7 @@ public class SeleccionUniforme implements EstrategiaInicializacion {
       List<Pixel> seleccionados = new ArrayList<>();
 
       // se determinan los colores maximo y minino
-      List<Integer> minMax = Utilidades.obtenerMinimoMaximo(pixels);
+      List<Integer> minMax = Utilidades.obtenerMinimoMaximoFuncional(pixels);
 
       // se agrega a seleccionados un pixel cuyo indice sea
       // el color minimo
@@ -83,6 +84,7 @@ public class SeleccionUniforme implements EstrategiaInicializacion {
       // bucle desde i = 1 hasta k-2 para agregar los
       // pixels con indices de colores que corresponden a las
       // marcas intermedias
+
       int color;
       for(int i=1; i < k-1; i++){
          color = minMax.get(0) + (int) Math.round(incremento*i);

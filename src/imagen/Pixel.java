@@ -1,6 +1,8 @@
 package imagen;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * representa puntos en un espacio tridimensional
@@ -100,8 +102,8 @@ public class Pixel implements Comparable<Pixel> {
     */
    public double distanciaCuadratica(Pixel otro) {
       return Math.pow(rojo - otro.rojo, 2) +
-         Math.pow(verde - otro.verde, 2) +
-         Math.pow(azul - otro.azul, 2);
+              Math.pow(verde - otro.verde, 2) +
+              Math.pow(azul - otro.azul, 2);
    }
 
    /**
@@ -140,10 +142,10 @@ public class Pixel implements Comparable<Pixel> {
     * NOTA: por implementar
     */
    public Pixel obtenerMasCercanoFuncional(List<Pixel> centros) {
-      // hacemos que sea un flujo de pixeles y lo ordenamos según la distancia cuadrática 
+      // hacemos que sea un flujo de pixeles y lo ordenamos según la distancia cuadrática
       // a cada centro para ver cuál es el más cercano al pixel que utiliza la llamada a la función
-      return centros.Stream().sorted(Comparator.comparingDouble(centro -> distanciaCuadratica(centro))).
-         collect(Collectors.toList()).get(0);
+      return centros.stream().sorted(Comparator.comparingDouble(centro -> distanciaCuadratica(centro))).
+              collect(Collectors.toList()).get(0);
    }
 
    /**
@@ -155,7 +157,7 @@ public class Pixel implements Comparable<Pixel> {
       // se devuelve la raiz de la suma de los valores
       // al cuadrado
       return Math.sqrt(Math.pow(rojo, 2) + Math.pow(verde, 2) +
-         Math.pow(azul, 2));
+              Math.pow(azul, 2));
    }
 
    /**

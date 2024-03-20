@@ -153,9 +153,9 @@ public class Imagen {
    }
 
    public long obtenerNumeroColoresFuncional() {
-      return datos.stream().
-              collect(Collectors.groupingBy(Function.identity(), HashMap::new, Collectors.counting())).
-              size();
+      // pasamos la lista a stream y pasando la coleccion a un hashmap contamos las ocurrencias de cada color
+      return datos.stream().collect(Collectors.groupingBy(Function.identity(), HashMap::new,
+                      Collectors.counting())).size();
    }
 
    public static void main(String[] args) {

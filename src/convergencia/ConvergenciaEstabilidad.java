@@ -3,6 +3,9 @@ package convergencia;
 import imagen.Pixel;
 import kmedias.KMedias;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * clase para determinacion de condicion de parada considerando
  * las diferencias entre los centros considerados al inicio y al
@@ -70,30 +73,12 @@ public class ConvergenciaEstabilidad extends EstrategiaConvergencia {
    }
    @Override
    public boolean convergenciaFuncional(KMedias kmedias) {
-      boolean convergencia = false;
-
-      // se consideran los pares de centros al inicio
-      // y final de la iteracion en curso
-      for(int i=0; i < kmedias.obtenerK(); i++){
-         Pixel centro1 = kmedias.obtenerCentrosT1().get(i);
-         Pixel centro2 = kmedias.obtenerCentrosT2().get(i);
-
-         // se acumula la distancia entre los centros
-         medida += centro1.distanciaCuadratica(centro2);
-      }
-
-      // se determina si la media de la medida es mayor
-      // que el umbral
-      medida = medida / kmedias.obtenerK();
-
-      // se determina si hay convergencia
-      if(medida > umbral ||
-              kmedias.obtenerContadorIteraciones() >= maxIteraciones){
-         convergencia = true;
-      }
-
+      medida = IntStream.range(0, kmedias.obtenerK()).boxed().
+              mapToDouble(indice -> (kmedias.obtenerCentrosT1().get(indice).distanciaCuadratica(
+                      kmedias.obtenerCentrosT2().get(indice)))
+              ).average().orElse(0);
       // se devuelve el resultado
-      return convergencia;
+      return ((medida > umbral) || (kmedias.obtenerContadorIteraciones() >= maxIteraciones));
    }
 
 }
