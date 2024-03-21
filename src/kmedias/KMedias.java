@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -335,7 +336,6 @@ public class KMedias {
       for(Pixel centro : centrosT1){
          resultado.put(centro, new ArrayList<>());
       }
-
       // procesado de los pixels uno por uno
       for(Pixel pixel : pixels){
          // se obtiene el centro mas cercano
@@ -354,24 +354,20 @@ public class KMedias {
       // mas cercano. El resultado se almacena en un
       // diccionario en que la clave seran los centros
       // y los valores las listas de pixels asociados
-      Map<Pixel, List<Pixel>> resultado = new HashMap<>();
 
-      // se agregan los centroides al resultado
-      for(Pixel centro : centrosT1){
-         resultado.put(centro, new ArrayList<>());
-      }
+      Map<Pixel, List<Pixel>> resultado = centrosT1.stream().collect(Collectors.groupingBy(
+                      pixel -> pixel, HashMap::new, Collectors.toList()
+              ));
 
-      // procesado de los pixels uno por uno
-      for(Pixel pixel : pixels){
+      pixels.stream().map(pixel -> {
          // se obtiene el centro mas cercano
-         Pixel centroMasCercano = pixel.obtenerMasCercanoFuncional(centrosT1);
+         Pixel centroMasCercano = pixel.obtenerMasCercano(centrosT1);
 
-         // actualizo la lista correspondiente
          List<Pixel> grupo = resultado.get(centroMasCercano);
          grupo.add(pixel);
+         return 1;
+      }).collect(Collectors.toList());
 
-      }
-      // se devuelve el mapa resultante
       return resultado;
    }
 
@@ -406,17 +402,38 @@ public class KMedias {
       // se calcula la medida para cada grupo de la
       // clasificacion realizada
 
-      for(int i=0; i < clasificacion.size(); i++){
-         List<Pixel> grupo = clasificacion.get(centrosT1.get(i));
+      IntStream.range(0, clasificacion.size()).boxed().
+              map(indice -> {
+                List<Pixel> grupo = clasificacion.get(centrosT1.get(indice));
 
-         // se comprueba que el grupo no este vacio
-         if(!grupo.isEmpty()){
-            centrosT2.add(Utilidades.calcularMediaFuncional(grupo));
-         }
-         else{
-            centrosT2.add(centrosT1.get(i));
-         }
-      }
+                if (grupo.isEmpty()) {
+                   centrosT2.add(centrosT1.get(indice));
+                }
+                else {
+                   centrosT2.add(Utilidades.calcularMediaFuncional(grupo));
+                }
+                return 1;
+              }).collect(Collectors.toList());
+   }
+
+   private void actualizarFuncionalV2() {
+      // se crea almacen para centros finales
+      centrosT2 = new ArrayList<>();
+
+      // se calcula la medida para cada grupo de la
+      // clasificacion realizada
+
+      IntStream.range(0, clasificacion.size()).boxed().
+              forEach(indice -> {
+                 List<Pixel> grupo = clasificacion.get(centrosT1.get(indice));
+
+                 if (grupo.isEmpty()) {
+                    centrosT2.add(centrosT1.get(indice));
+                 }
+                 else {
+                    centrosT2.add(Utilidades.calcularMediaFuncional(grupo));
+                 }
+              });
    }
 
    /**
