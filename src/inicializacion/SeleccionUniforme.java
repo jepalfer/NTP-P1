@@ -6,6 +6,7 @@ import kmedias.KMedias;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -67,34 +68,19 @@ public class SeleccionUniforme implements EstrategiaInicializacion {
       // se obtiene el valor de k
       int k = kmedias.obtenerK();
 
-      // se crea la lista a devolver
-      List<Pixel> seleccionados = new ArrayList<>();
-
       // se determinan los colores maximo y minino
       List<Integer> minMax = Utilidades.obtenerMinimoMaximoFuncional(pixels);
-
-      // se agrega a seleccionados un pixel cuyo indice sea
-      // el color minimo
-      seleccionados.add(new Pixel(minMax.get(0)));
 
       // calcular el incremento entre marca y marca
       double incremento =
               (minMax.get(1) - minMax.get(0)) / ((k-1) * 1.0);
 
-      // bucle desde i = 1 hasta k-2 para agregar los
-      // pixels con indices de colores que corresponden a las
-      // marcas intermedias
-
-      int color;
-      for(int i=1; i < k-1; i++){
-         color = minMax.get(0) + (int) Math.round(incremento*i);
-         seleccionados.add(new Pixel(color));
-      }
-
-      // agregar el pixel del mayor indice de color
-      seleccionados.add(new Pixel(minMax.get(1)));
-
-      // se devuelve la lista de seleccionados
-      return seleccionados;
+      // bucle desde 0 hasta k para añadir tanto el primer elemento (minMax.get(0)) como los intermedios
+      // además de que también se añadiría el último porque el incremento entre marcas sería el máximo
+      // y al sumarselo a minMax.get(0) llegariamos a minMax.get(1)
+      return IntStream.range(0, k).
+              boxed().
+              map(indice -> new Pixel(minMax.get(0) + (int) Math.round(incremento * indice))
+              ).collect(Collectors.toList());
    }
 }

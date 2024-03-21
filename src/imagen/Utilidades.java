@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -163,23 +164,7 @@ public interface Utilidades {
       Imagen imagen = null;
       try {
          FileInputStream fichero = new FileInputStream(ruta);
-         imagen = cargarImagen(fichero);
-
-         // se asigna la ruta del fichero
-         fichero.close();
-      } catch (Exception e) {
-         System.out.println("error de carga de " + ruta);
-         System.out.println(e);
-      }
-
-      // se devuelve la imagen creada o null
-      return imagen;
-   }
-   static Imagen cargarImagenFuncional(String ruta) {
-      Imagen imagen = null;
-      try {
-         FileInputStream fichero = new FileInputStream(ruta);
-         imagen = cargarImagen(fichero);
+         imagen = cargarImagenFuncional(fichero);
 
          // se asigna la ruta del fichero
          fichero.close();
@@ -232,13 +217,17 @@ public interface Utilidades {
          BufferedImage buffer = ImageIO.read(flujo);
 
          // se crea una lista con los indices de los colores
-         List<Integer> datos = new ArrayList<>();
          int dimension = buffer.getHeight()*buffer.getWidth();
-         for(int i=0; i < dimension; i++){
-            List<Integer> indices = convertirDesplazamientoIndices(i,
-                    buffer.getWidth());
-            datos.add(buffer.getRGB(indices.get(0), indices.get(1)));
-         }
+
+         List<Integer> datos = IntStream.range(0, dimension).
+                 boxed().
+                 map(indice -> {
+                    List<Integer> indices = convertirDesplazamientoIndices(indice,
+                            buffer.getWidth());
+
+                    return buffer.getRGB(indices.get(0), indices.get(1));
+                 }).
+                 collect(Collectors.toList());
 
          // se puede crear la imagen
          imagen = new Imagen(buffer.getWidth(), buffer.getHeight(), datos);
@@ -292,12 +281,20 @@ public interface Utilidades {
 
          // recorrido para almacenar los pixels
          int dimension = imagen.obtenerColumnas() * imagen.obtenerFilas();
-         for(int i=0; i < dimension; i++){
-            List<Integer> indices =
-                    convertirDesplazamientoIndices(i, imagen.obtenerColumnas());
-            buffer.setRGB(indices.get(0), indices.get(1),
-                    imagen.obtenerColorPixel(i));
-         }
+
+         IntStream.range(0, dimension).
+                 boxed().
+                 map(indice -> {
+                    List<Integer> indices =
+                            convertirDesplazamientoIndices(indice, imagen.obtenerColumnas());
+
+                    buffer.setRGB(indices.get(0), indices.get(1),
+                            imagen.obtenerColorPixel(indice));
+
+                    return 1;
+                 }).collect(Collectors.toList());
+
+         System.out.println(buffer);
 
          // se guarda el buffer
          ImageIO.write(buffer, "png", fichero);

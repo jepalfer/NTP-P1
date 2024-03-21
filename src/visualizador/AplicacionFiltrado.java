@@ -736,7 +736,7 @@ public class AplicacionFiltrado extends JFrame {
     * @param nombre nombre del archivo a salvar
     */
    private void salvarArchivo(String nombre) {
-      Utilidades.salvarImagen(canvas.obtenerImagen(), nombre);
+      Utilidades.salvarImagenFuncional(canvas.obtenerImagen(), nombre);
    }
 
    /**

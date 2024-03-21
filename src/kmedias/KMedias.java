@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * clase base para implementacion del algoritmo de
@@ -403,6 +405,7 @@ public class KMedias {
 
       // se calcula la medida para cada grupo de la
       // clasificacion realizada
+
       for(int i=0; i < clasificacion.size(); i++){
          List<Pixel> grupo = clasificacion.get(centrosT1.get(i));
 
@@ -448,24 +451,17 @@ public class KMedias {
               pixels);
    }
    private Imagen aplicarFiltroFuncional() {
-      // se crea una nueva imagen usando unicamente los
-      // centros finales como pixels
-      List<Integer> pixels = new ArrayList<>();
-
       // considero todos los pixels de la imagen
       int dimension = imagen.obtenerColumnas()*imagen.obtenerFilas();
 
-      // recorrido de los pixels
-      for(int i=0; i < dimension; i++){
-         int colorPixel = imagen.obtenerColorPixel(i);
-         Pixel pixel = new Pixel(colorPixel);
+      List<Integer> pixels = IntStream.range(0, dimension).boxed().map(indice -> {
+         int color = imagen.obtenerColorPixel(indice);
+         Pixel pixel = new Pixel(color);
 
          // se obtiene el mas cercano
          Pixel masCercano = pixel.obtenerMasCercanoFuncional(centrosT1);
-
-         // se agrega a la lista de pixels finales
-         pixels.add(masCercano.obtenerIndice());
-      }
+         return masCercano.obtenerIndice();
+      }).collect(Collectors.toList());
 
       // devuelve la imagen creada
       return new Imagen(imagen.obtenerColumnas(), imagen.obtenerFilas(),
